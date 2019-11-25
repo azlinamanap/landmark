@@ -1,0 +1,20 @@
+{% extends "_layout.html" %}
+
+{% block title %}
+Homepage
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<h1>Form here</h1>
+
+<form action="{{url_for('users_api.detect_landmarks_uri')}}" method="POST" enctype="multipart/form-data">
+    <label for="user_image">Upload your image here</label>
+    <br />
+    <input type="file" name="user_image" />
+    <br />
+    <button class="btn btn-primary" type="submit">Post</button>
+</form>
+{% endblock %}
