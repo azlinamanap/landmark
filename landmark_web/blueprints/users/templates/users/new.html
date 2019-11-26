@@ -11,6 +11,7 @@ Homepage
 <h1>Form here</h1>
 
 <form action="{{url_for('users_api.detect_landmarks_uri')}}" method="POST" enctype="multipart/form-data">
+    <input type='hidden' name="csrf_token" value="{{csrf_token()}}" />
     <label for="user_image">Upload your image here</label>
     <br />
     <input type="file" name="user_image" />
