@@ -48,20 +48,20 @@ def getimage(id):
     return jsonify(result)
 
 
-@images_api_blueprint.route('/<id>/newfact', methods=['POST'])
-@jwt_required
-def newfact(id):
-    current_user_id = get_jwt_identity()
-    image = Images.get_by_id(id)
-    fact = Facts(
-        images=image,
-        title=request.json.get('title')
-        text=request.json.get('text')
-        user=current_user_id
-    )
-    if fact.save():
-        return redirect(url_for('home'))
-    else:
-        return jsonify(fact.errors, {
-            "status": "failed"
-        }), 400
+# @images_api_blueprint.route('/<id>/newfact', methods=['POST'])
+# @jwt_required
+# def newfact(id):
+#     current_user_id = get_jwt_identity()
+#     image = Images.get_by_id(id)
+#     fact = Facts(
+#         images=image,
+#         title=request.json.get('title')
+#         text=request.json.get('text')
+#         user=current_user_id
+#     )
+#     if fact.save():
+#         return redirect(url_for('home'))
+#     else:
+#         return jsonify(fact.errors, {
+#             "status": "failed"
+#         }), 400
