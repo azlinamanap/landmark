@@ -1,6 +1,7 @@
 from flask import Flask, Blueprint, request, jsonify, render_template, redirect, url_for
 from models.user import User
 from models.user import Images
+from models.user import Facts
 from flask_jwt_extended import (
     jwt_required, get_jwt_identity)
 
@@ -21,7 +22,7 @@ def getuserimages(id):
 
 @images_api_blueprint.route('/me', methods=['GET'])
 @jwt_required
-def myimage():
+def myimages():
     current_user_id = get_jwt_identity()
     images = []
     for image in Images.select().where(Images.user_id == current_user.id):
