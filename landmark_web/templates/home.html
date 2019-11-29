@@ -1,12 +1,17 @@
 {% extends "_layout.html" %}
 
 {% block title %}
-  Homepage
+Homepage
 {% endblock %}
 
 {% block header %}
 {% endblock %}
 
 {% block content %}
-  <h1>Homepage</h1>
+<h1>Homepage</h1>
+
+{% if current_user.is_authenticated %}
+<a href="{{ url_for('users.logout') }}">Log out</a>
+{% endif %}
+
 {% endblock %}
