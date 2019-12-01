@@ -97,6 +97,7 @@ def login():
 
 @users_api_blueprint.route('/me/edit', methods=['POST'])
 @jwt_required
+@csrf.exempt
 def update():
     current_user_id = get_jwt_identity()
     current_user = User.get_by_id(current_user_id)
@@ -208,4 +209,4 @@ def detect_landmarks_uri():
                  name=result[0]["name"], description=wiki, latitude=result[0]["locations"][0]["lat_lng"]["latitude"], longitude=result[0]["locations"][0]["lat_lng"]["longitude"], user_id=current_user_id)
     add.save()
 
-    return redirect(url_for('info', name=name1))
+    return jsonify(result)

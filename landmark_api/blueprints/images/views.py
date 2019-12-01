@@ -59,15 +59,14 @@ def getimage(id):
 
 @images_api_blueprint.route('/<id>/newfact', methods=['POST'])
 @csrf.exempt
-@jwt_required
 def newfact(id):
     current_user_id = get_jwt_identity()
     image = Images.get_by_id(id)
     fact = Facts(
-        images=image,
+        images_id=image,
         title=request.json.get('title'),  # no title needed
         text=request.json.get('text'),
-        user=current_user_id
+        user_id=current_user_id
     )
     if fact.save():
         return redirect(url_for('home'))
