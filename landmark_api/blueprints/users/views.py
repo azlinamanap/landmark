@@ -113,6 +113,8 @@ def update():
     else:
         if not username:
             username = current_user.username
+        if not password:
+            password = current_user.password
         if User.update(username=username).where(User.id == current_user_id).execute():
             result = {
                 "jwt": create_access_token(identity=current_user_id),
