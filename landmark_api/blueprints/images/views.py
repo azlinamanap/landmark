@@ -4,7 +4,7 @@ from models.user import Images
 from models.user import Facts
 from flask_jwt_extended import (
     jwt_required, get_jwt_identity)
-
+from app import csrf
 
 images_api_blueprint = Blueprint('images_api',
                                  __name__,
@@ -58,13 +58,14 @@ def getimage(id):
 
 
 @images_api_blueprint.route('/<id>/newfact', methods=['POST'])
+@csrf.exempt
 @jwt_required
 def newfact(id):
     current_user_id = get_jwt_identity()
     image = Images.get_by_id(id)
     fact = Facts(
         images=image,
-        title=request.json.get('title'),
+        title=request.json.get('title'),  # no title needed
         text=request.json.get('text'),
         user=current_user_id
     )
@@ -83,7 +84,7 @@ def facts(id):
     image = Images.get_or_none(Images.id == id)
 
     facts = []
-    for fact in Facts.select().where(Facts.image_id=image.id):
+    for fact in Facts.select().where(Facts.image_id == image.id):
         facts.append(facts.id)
 
     return jsonify(facts)
