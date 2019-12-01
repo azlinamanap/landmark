@@ -29,7 +29,7 @@ def getuserimages(id):
 def myimages():
     current_user_id = get_jwt_identity()
     images = []
-    for image in Images.select().where(Images.user_id == current_user.id):
+    for image in Images.select().where(Images.user_id == current_user_id):
         images.append(image.image)
 
     return jsonify(images)
