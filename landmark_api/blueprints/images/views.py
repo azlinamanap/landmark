@@ -92,7 +92,7 @@ def facts(id):
 # GET ALL IMAGES FOR A LOCATION
 
 
-@images_api_blueprint.roue('/search', methods=['GET'])
+@images_api_blueprint.route('/search', methods=['GET'])
 def location():
     placename = request.json.get('placename')
     images = Images.select().where(Images.name == placename)
