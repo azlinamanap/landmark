@@ -10,6 +10,8 @@ images_api_blueprint = Blueprint('images_api',
                                  __name__,
                                  template_folder='templates')
 
+# GET IMAGES FOR SPECIFIED USER
+
 
 @images_api_blueprint.route('/user/<id>', methods=['GET'])
 def getuserimages(id):
@@ -18,6 +20,8 @@ def getuserimages(id):
         images.append(image.image)
 
     return jsonify(images)
+
+# GET ALL IMAGES FOR CURRENT USER
 
 
 @images_api_blueprint.route('/me', methods=['GET'])
@@ -29,6 +33,8 @@ def myimages():
         images.append(image.image)
 
     return jsonify(images)
+
+# GET SPECIFIC IMAGE
 
 
 @images_api_blueprint.route('/<id>', methods=['GET'])
@@ -48,6 +54,8 @@ def getimage(id):
     result.append(response)
     return jsonify(result)
 
+# POST NEW FACT FOR AN IMAGE
+
 
 @images_api_blueprint.route('/<id>/newfact', methods=['POST'])
 @jwt_required
@@ -66,3 +74,33 @@ def newfact(id):
         return jsonify(fact.errors, {
             "status": "failed"
         }), 400
+
+# GET ALL FACTS ASSOCIATED WITH IMAGE
+
+
+@images_api_blueprint.route('/<id>/facts', methods=['GET'])
+def facts(id):
+    image = Images.get_or_none(Images.id == id)
+
+    facts = []
+    for fact in Facts.select().where(Facts.image_id=image.id):
+        facts.append(facts.id)
+
+    return jsonify(facts)
+
+# GET ALL IMAGES FOR A LOCATION
+
+
+@images_api_blueprint.roue('/search', methods=['GET'])
+def location():
+    placename = request.json.get('placename')
+    images = Images.select().where(Images.name == placename)
+    results = []
+    if images:
+        for image in images:
+            results.append(image.id)
+        return jsonify(results)
+
+    else:
+        flash('no images for this location yet.')
+        return redirect(url_for('home'))

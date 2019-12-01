@@ -14,6 +14,8 @@ users_api_blueprint = Blueprint('users_api',
                                 __name__,
                                 template_folder='templates')
 
+# GET ALL USERS
+
 
 @users_api_blueprint.route('/', methods=['GET'])
 def getusers():
@@ -26,6 +28,8 @@ def getusers():
         users.append(response)
     return jsonify(users)
 
+# GET CURRENT USER
+
 
 @users_api_blueprint.route('/me', methods=['GET'])
 @jwt_required
@@ -37,6 +41,8 @@ def me():
         "password": current_user.password
     }
     return jsonify(result)
+
+# CREATE NEW USER
 
 
 @users_api_blueprint.route('/', methods=['POST'])
@@ -59,6 +65,8 @@ def newuser():
             "status": "Failed to create new account."
         }), 400
 
+# LOGIN USER
+
 
 @users_api_blueprint.route('/login', methods=['POST'])
 def login():
@@ -77,6 +85,58 @@ def login():
         return jsonify({
             "status": "Failed to sign in."
         }), 400
+
+# EDIT PROFILE FOR CURRENT USER
+
+
+@users_api_blueprint.route('/edit', methods=['POST'])
+@jwt_required
+def update():
+    current_user_id = get_jwt_identity()
+    current_user = User.get_by_id(current_user_id)
+    username = request.json.get('newusername')
+    password = request.json.get('password')
+
+    check_username = User.get_or_none(User.username == username)
+
+    if check_username:
+        return jsonify({
+            "status": "Username already taken."
+        }), 400
+    else:
+        if not username:
+            username = current_user.username
+        if User.update(username=username).where(User.id == current_user_id).execute():
+            result = {
+                "jwt": create_access_token(identity=current_user_id),
+                "username": username,
+                "message": "Successfully edited details."
+            }
+            return jsonify(result)
+        else:
+            return jsonify({
+                "status": "Failed to edit profile."
+            }), 400
+
+# SEARCH FOR USER CONTAINING SUBSTRING
+
+
+@users_api_blueprint.route('/search', methods=['GET'])
+def searchuser():
+    string = request.json.get('searchstring')
+    users = User.select().where(User.username.contains(string))
+    matches = []
+    if users:
+        for user in users:
+            matches.append(user.id)
+        return jsonify(matches)
+
+    else:
+        return jsonify({
+            "status": "No such user."
+        }), 400
+
+# API SHIT
 
 
 @users_api_blueprint.route('/json', methods=['POST'])
