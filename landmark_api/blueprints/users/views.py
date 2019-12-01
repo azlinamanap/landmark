@@ -101,8 +101,8 @@ def login():
 def update():
     current_user_id = get_jwt_identity()
     current_user = User.get_by_id(current_user_id)
-    username = request.json.get('newusername')
-    password = request.json.get('newpassword')
+    username = request.json.get('username')
+    password = request.json.get('password')
 
     check_username = User.get_or_none(User.username == username)
 
