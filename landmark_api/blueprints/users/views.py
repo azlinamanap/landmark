@@ -185,7 +185,7 @@ def detect_landmarks_uri():
     # kg_request = requests.get(
     #     f"https://kgsearch.googleapis.com/v1/entities:search?ids={kg_id}&key={os.environ.get('GOOGLE_KG_API_KEY')}&limit=1&indent=True")
     # kg = kg_request.json()
-
+    # random
     result = [
         {
             "mid": landmark.mid,
