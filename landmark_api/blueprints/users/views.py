@@ -272,4 +272,22 @@ def detect_landmarks_uri():
                  name=result[0]["name"], description=wiki, latitude=result[0]["locations"][0]["lat_lng"]["latitude"], longitude=result[0]["locations"][0]["lat_lng"]["longitude"], user_id=current_user_id, width=width, height=height)
     add.save()
 
-    return jsonify(result)
+    result2 = [
+        {
+            "mid": landmark.mid,
+            "name": landmark.description,
+            "score": landmark.score,
+            "id": add.id,
+            "locations": [
+                {
+                    "lat_lng": {
+                        "latitude": landmark.locations[0].lat_lng.latitude,
+                        "longitude": landmark.locations[0].lat_lng.longitude
+                    }
+                }
+            ],
+            # "description": kg["itemListElement"][0]["result"]["detailedDescription"]["articleBody"]
+        } for landmark in landmarks
+    ]
+
+    return jsonify(result2)
