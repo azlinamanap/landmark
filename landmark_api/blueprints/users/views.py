@@ -232,6 +232,7 @@ def detect_landmarks_uri():
         flash('Upload unsuccessful')
     cred = service_account.Credentials.from_service_account_info(
         os.environ.get('GOOGLE_CRED'))
+
     client = vision.ImageAnnotatorClient(credentials=cred)
     image = vision.types.Image()
 
