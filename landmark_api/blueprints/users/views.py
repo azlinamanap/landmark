@@ -11,6 +11,7 @@ import requests
 import wikipedia
 import datetime
 import random
+from google.oauth2 import service_account
 
 users_api_blueprint = Blueprint('users_api',
                                 __name__,
@@ -206,9 +207,9 @@ def searchuser():
 # API SHIT
 
 
+# @jwt_required
 @users_api_blueprint.route('/json', methods=['POST'])
 @csrf.exempt
-@jwt_required
 def detect_landmarks_uri():
     """Detects landmarks in the file."""
 
@@ -229,8 +230,9 @@ def detect_landmarks_uri():
 
     except:
         flash('Upload unsuccessful')
-
-    client = vision.ImageAnnotatorClient()
+    cred = service_account.Credentials.from_service_account_info(
+        os.environ.get('GOOGLE_CRED'))
+    client = vision.ImageAnnotatorClient(credentials=cred)
     image = vision.types.Image()
 
     path = f'https://{os.environ.get("S3_BUCKET")}.s3-eu-west-2.amazonaws.com/' + \
