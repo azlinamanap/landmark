@@ -10,6 +10,7 @@ from google.cloud import vision
 import requests
 import wikipedia
 import datetime
+import random
 
 users_api_blueprint = Blueprint('users_api',
                                 __name__,
@@ -39,7 +40,10 @@ def me():
     current_user = User.get_by_id(current_user_id)
     result = {
         "username": current_user.username,
-        "password": current_user.password
+        "password": current_user.password,
+        "email": current_user.email,
+        "description": current_user.description,
+        "profileImage": current_user.profile_image_path
     }
     return jsonify(result)
 
@@ -50,14 +54,21 @@ def me():
 @csrf.exempt
 def newuser():
     username = request.json.get('username')
+    email = request.json.get('email')
     check_user = User.get_or_none(User.username == username)
+    check_email = User.get_or_none(User.email == email)
     if check_user:
         return jsonify({
             "status": "Username already taken."
         }), 418
+    if check_email:
+        return jsonify({
+            "status": "Email already used."
+        }), 418
     user = User(
         username=username,
-        password=request.json.get('password')
+        password=request.json.get('password'),
+        email=email
     )
     if user.save():
         access_token = create_access_token(identity=user.id)
@@ -103,6 +114,8 @@ def update():
     current_user = User.get_by_id(current_user_id)
     username = request.json.get('username')
     password = request.json.get('password')
+    email = request.json.get('email')
+    description = request.json.get('description')
 
     check_username = User.get_or_none(User.username == username)
 
@@ -110,34 +123,79 @@ def update():
         return jsonify({
             "status": "Username already taken."
         }), 400
-    else:
-        if not username:
-            username = current_user.username
-        if not password:
-            password = current_user.password
-        if User.update(username=username).where(User.id == current_user_id).execute():
-            result = {
-                "jwt": create_access_token(identity=current_user_id),
-                "username": username,
-                "message": "Successfully edited details."
+
+    if not username:
+        username = current_user.username  # check for if username isnt changed
+    if not password:
+        password = current_user.password
+    if not email:
+        email = current_user.email
+    if not description:
+        description = current_user.description
+    User.update(username=username, password=password, email=email,
+                description=description).where(User.id == current_user_id).execute()
+    result = {
+        "jwt": create_access_token(identity=current_user_id),
+        "username": username,
+        "email": email,
+        "description": description,
+        "message": "Successfully edited details."
+    }
+    return jsonify(result)
+
+
+# EDIT PROFILE PICTURE
+@users_api_blueprint.route('/me/edit/picture', methods=['POST'])
+@csrf.exempt
+@jwt_required
+def updatepic():
+    profileImage = request.files.get('profileImage')
+
+    current_user_id = get_jwt_identity()
+    current_user = User.get_by_id(current_user_id)
+    try:
+        s3.upload_fileobj(
+            profileImage,
+            os.environ.get('S3_BUCKET'),
+            profileImage.filename,
+            ExtraArgs={
+                "ACL": 'public-read',
+                "ContentType": profileImage.content_type
             }
-            return jsonify(result)
-        else:
-            return jsonify({
-                "status": "Failed to edit profile."
-            }), 400
+        )
+
+        User.update(profilepic=profileImage.filename).where(
+            User.id == current_user_id).execute()
+
+    except:
+        flash('Upload unsuccessful')
+
+    result = {
+        "jwt": create_access_token(identity=current_user_id),
+        "profileImage": current_user.profile_image_path,
+        "message": "Successfully edited details."
+    }
+
+    return jsonify(result)
+
 
 # SEARCH FOR USER CONTAINING SUBSTRING
 
 
-@users_api_blueprint.route('/search', methods=['GET'])
+@users_api_blueprint.route('/search', methods=['POST'])
+@csrf.exempt
 def searchuser():
-    string = request.json.get('searchstring')
+    string = request.form.get('searchInput')
     users = User.select().where(User.username.contains(string))
     matches = []
+
     if users:
         for user in users:
-            matches.append(user.id)
+            matches.append({
+                "profileImage": user.profile_image_path,
+                "username": user.username,
+                "description": user.description
+            })
         return jsonify(matches)
 
     else:
@@ -155,6 +213,7 @@ def detect_landmarks_uri():
     """Detects landmarks in the file."""
 
     picture = request.files.get('user_image')
+
     current_user_id = get_jwt_identity()
 
     try:
@@ -207,8 +266,10 @@ def detect_landmarks_uri():
 
     name1 = result[0]["name"]
     wiki = wikipedia.summary(name1)
+    width = random.randint(1, 4)
+    height = random.randint(1, 4)
     add = Images(image=picture.filename,
-                 name=result[0]["name"], description=wiki, latitude=result[0]["locations"][0]["lat_lng"]["latitude"], longitude=result[0]["locations"][0]["lat_lng"]["longitude"], user_id=current_user_id)
+                 name=result[0]["name"], description=wiki, latitude=result[0]["locations"][0]["lat_lng"]["latitude"], longitude=result[0]["locations"][0]["lat_lng"]["longitude"], user_id=current_user_id, width=width, height=height)
     add.save()
 
     return jsonify(result)

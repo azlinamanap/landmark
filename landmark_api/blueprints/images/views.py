@@ -1,7 +1,8 @@
-from flask import Flask, Blueprint, request, jsonify, render_template, redirect, url_for
+from flask import Flask, Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from models.user import User
 from models.user import Images
 from models.user import Facts
+import os
 from flask_jwt_extended import (
     jwt_required, get_jwt_identity)
 from app import csrf
@@ -17,7 +18,8 @@ images_api_blueprint = Blueprint('images_api',
 def getuserimages(id):
     images = []
     for image in Images.select().where(Images.user_id == id):
-        images.append(image.image)
+        images.append(
+            f'https://{os.environ.get("S3_BUCKET")}.s3-eu-west-2.amazonaws.com/'+image.image)
 
     return jsonify(images)
 
@@ -30,7 +32,13 @@ def myimages():
     current_user_id = get_jwt_identity()
     images = []
     for image in Images.select().where(Images.user_id == current_user_id):
-        images.append(image.image)
+        images.append({
+            "src": f'https://{os.environ.get("S3_BUCKET")}.s3-eu-west-2.amazonaws.com/'+image.image,
+            "width": image.width,
+            "height": image.height,
+            "id": image.id,
+            "title": image.name
+        })
 
     return jsonify(images)
 
@@ -39,37 +47,45 @@ def myimages():
 
 @images_api_blueprint.route('/<id>', methods=['GET'])
 def getimage(id):
-    result = []
+    # result = []
     image = Images.get_or_none(Images.id == id)
     user = User.get_or_none(User.id == image.user_id)
     if image:
         response = {
             'name': image.name,
-            'url': image.image,
+            'url': f'https://{os.environ.get("S3_BUCKET")}.s3-eu-west-2.amazonaws.com/'+image.image,
             'description': image.description,
             'latitude': image.latitude,
             'longitude': image.longitude,
             'user': user.username
         }
-    result.append(response)
-    return jsonify(result)
+    # result.append(response)
+    return jsonify(response)
 
 # POST NEW FACT FOR AN IMAGE
 
 
 @images_api_blueprint.route('/<id>/newfact', methods=['POST'])
+@jwt_required
 @csrf.exempt
 def newfact(id):
     current_user_id = get_jwt_identity()
+    print(current_user_id)
+
     image = Images.get_by_id(id)
+
     fact = Facts(
-        images_id=image,
-        title=request.json.get('title'),  # no title needed
+        images_id=image.id,
+        title=request.json.get('title'),
         text=request.json.get('text'),
         user_id=current_user_id
     )
     if fact.save():
-        return redirect(url_for('home'))
+        result = {
+            "title": fact.title,
+            "text": fact.text
+        }
+        return jsonify(result)
     else:
         return jsonify(fact.errors, {
             "status": "failed"
@@ -81,26 +97,41 @@ def newfact(id):
 @images_api_blueprint.route('/<id>/facts', methods=['GET'])
 def facts(id):
     image = Images.get_or_none(Images.id == id)
+    facts = Facts.select().where(Facts.images_id == image.id)
 
-    facts = []
-    for fact in Facts.select().where(Facts.image_id == image.id):
-        facts.append(facts.id)
+    results = []
+    for fact in facts:
+        results.append({
+            "username": User.get_or_none(User.id == fact.user_id).username,
+            "title": fact.title,
+            "text": fact.text,
+            "id": fact.id
+        })
 
-    return jsonify(facts)
+    return jsonify(results)
 
 # GET ALL IMAGES FOR A LOCATION
 
 
-@images_api_blueprint.route('/search', methods=['GET'])
+@images_api_blueprint.route('/search', methods=['POST'])
+@csrf.exempt
 def location():
-    placename = request.json.get('placename')
-    images = Images.select().where(Images.name == placename)
+    placename = request.form.get('placename')
+    images = Images.select().where(Images.name.contains(placename))
     results = []
     if images:
         for image in images:
-            results.append(image.id)
+            results.append({
+                "src": f'https://{os.environ.get("S3_BUCKET")}.s3-eu-west-2.amazonaws.com/'+image.image,
+                "width": image.width,
+                "height": image.height,
+                "title": image.name,
+                "id": image.id
+            })
         return jsonify(results)
 
     else:
         flash('no images for this location yet.')
-        return redirect(url_for('home'))
+        return jsonify({
+            "status": "failed"
+        }), 400
