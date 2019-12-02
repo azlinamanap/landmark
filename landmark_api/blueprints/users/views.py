@@ -207,8 +207,9 @@ def searchuser():
 # API SHIT
 
 
-# @jwt_required
+
 @users_api_blueprint.route('/json', methods=['POST'])
+@jwt_required
 @csrf.exempt
 def detect_landmarks_uri():
     """Detects landmarks in the file."""
