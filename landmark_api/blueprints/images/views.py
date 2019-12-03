@@ -68,7 +68,7 @@ def getimage(id):
     # result.append(response)
     return jsonify(response)
 
-# POST NEW FACT FOR AN IMAGE
+# POST NEW FACT FOR A PLACE
 
 
 @images_api_blueprint.route('/<id>/newfact', methods=['POST'])
@@ -76,20 +76,21 @@ def getimage(id):
 @csrf.exempt
 def newfact(id):
     current_user_id = get_jwt_identity()
-    print(current_user_id)
 
     image = Images.get_by_id(id)
 
     fact = Facts(
-        images_id=image.id,
+        # images_id=image.id,
         title=request.json.get('title'),
         text=request.json.get('text'),
-        user_id=current_user_id
+        user_id=current_user_id,
+        place=image.name
     )
     if fact.save():
         result = {
             "title": fact.title,
-            "text": fact.text
+            "text": fact.text,
+            "place": fact.place
         }
         return jsonify(result)
     else:
@@ -97,13 +98,13 @@ def newfact(id):
             "status": "failed"
         }), 400
 
-# GET ALL FACTS ASSOCIATED WITH IMAGE
+# GET ALL FACTS ASSOCIATED WITH PLACE
 
 
 @images_api_blueprint.route('/<id>/facts', methods=['GET'])
 def facts(id):
     image = Images.get_or_none(Images.id == id)
-    facts = Facts.select().where(Facts.images_id == image.id)
+    facts = Facts.select().where(Facts.place == image.name)
 
     results = []
     for fact in facts:

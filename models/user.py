@@ -37,7 +37,8 @@ class Images(BaseModel):
 
 
 class Facts(BaseModel):
-    images = pw.ForeignKeyField(Images, backref="facts")
+    # images = pw.ForeignKeyField(Images, backref="facts")
     title = pw.CharField(unique=False)
     text = pw.TextField()
     user = pw.ForeignKeyField(User, backref="facts")
+    place = pw.CharField(unique=False)
