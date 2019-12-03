@@ -18,8 +18,13 @@ images_api_blueprint = Blueprint('images_api',
 def getuserimages(id):
     images = []
     for image in Images.select().where(Images.user_id == id):
-        images.append(
-            f'https://{os.environ.get("S3_BUCKET")}.s3-eu-west-2.amazonaws.com/'+image.image)
+        images.append({
+            "src": f'https://{os.environ.get("S3_BUCKET")}.s3-eu-west-2.amazonaws.com/'+image.image,
+            "width": image.width,
+            "height": image.height,
+            "id": image.id,
+            "title": image.name
+        })
 
     return jsonify(images)
 
