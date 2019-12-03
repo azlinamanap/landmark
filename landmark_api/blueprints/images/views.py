@@ -57,7 +57,8 @@ def getimage(id):
             'description': image.description,
             'latitude': image.latitude,
             'longitude': image.longitude,
-            'user': user.username
+            'user': user.username,
+            'profileImage': user.profile_image_path
         }
     # result.append(response)
     return jsonify(response)
