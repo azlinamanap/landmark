@@ -172,6 +172,7 @@ def updatepic():
     randomString = uuid.uuid4().hex
     randomString = randomString[0:8]
     profileImage.filename = randomString + '.png'
+    
     try:
         s3.upload_fileobj(
             profileImage,
