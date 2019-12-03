@@ -11,6 +11,7 @@ import requests
 import wikipedia
 import datetime
 import random
+import uuid
 from google.oauth2 import service_account
 
 users_api_blueprint = Blueprint('users_api',
@@ -168,6 +169,9 @@ def updatepic():
 
     current_user_id = get_jwt_identity()
     current_user = User.get_by_id(current_user_id)
+    randomString = uuid.uuid4().hex
+    randomString = randomString[0:8]
+    profileImage.filename = randomString + '.png'
     try:
         s3.upload_fileobj(
             profileImage,
@@ -231,6 +235,10 @@ def detect_landmarks_uri():
     picture = request.files.get('user_image')
 
     current_user_id = get_jwt_identity()
+
+    randomString = uuid.uuid4().hex
+    randomString = randomString[0:8]
+    picture.filename = randomString + '.png'
 
     try:
         s3.upload_fileobj(
