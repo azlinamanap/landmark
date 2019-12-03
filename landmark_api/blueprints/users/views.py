@@ -41,7 +41,7 @@ def thisuser(id):
             'username': user.username,
             'id': user.id,
             'description': user.description,
-            'profileImage': user.profile_image_path,
+            'profileImage': user.profile_image_path
         }
     return jsonify(response)
 
@@ -282,8 +282,8 @@ def detect_landmarks_uri():
 
     name1 = result[0]["name"]
     wiki = wikipedia.summary(name1)
-    width = random.randint(1, 4)
-    height = random.randint(1, 4)
+    width = random.randint(3, 4)
+    height = random.randint(3, 4)
     add = Images(image=picture.filename,
                  name=result[0]["name"], description=wiki, latitude=result[0]["locations"][0]["lat_lng"]["latitude"], longitude=result[0]["locations"][0]["lat_lng"]["longitude"], user_id=current_user_id, width=width, height=height)
     add.save()
