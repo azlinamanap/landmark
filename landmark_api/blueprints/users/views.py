@@ -145,7 +145,7 @@ def update():
         email = current_user.email
     if not description:
         description = current_user.description
-    User.update(username=username, password=password, email=email,
+    User.update(username=username, email=email,
                 description=description).where(User.id == current_user_id).execute()
     result = {
         "jwt": create_access_token(identity=current_user_id),
