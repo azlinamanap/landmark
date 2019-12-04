@@ -139,8 +139,11 @@ def update():
             "status": "Username already taken."
         }), 400
 
+    if username == current_user.username:
+        username = current_user.username
     if not username:
-        username = current_user.username  # check for if username isnt changed
+        username = current_user.username
+    
     if not email:
         email = current_user.email
     if not description:
