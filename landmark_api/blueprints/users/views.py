@@ -129,7 +129,6 @@ def update():
     current_user_id = get_jwt_identity()
     current_user = User.get_by_id(current_user_id)
     username = request.json.get('username')
-    password = request.json.get('password')
     email = request.json.get('email')
     description = request.json.get('description')
 
@@ -142,8 +141,6 @@ def update():
 
     if not username:
         username = current_user.username  # check for if username isnt changed
-    if not password:
-        password = current_user.password
     if not email:
         email = current_user.email
     if not description:
