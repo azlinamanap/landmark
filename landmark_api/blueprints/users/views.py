@@ -138,11 +138,9 @@ def update():
         return jsonify({
             "status": "Username already taken."
         }), 400
-
    
     if not username:
         username = current_user.username
-    
     if not email:
         email = current_user.email
     if not description:
