@@ -50,7 +50,7 @@ s3transfer==0.2.1
 six==1.12.0
 soupsieve==1.9.5
 typed-ast==1.4.0
-urllib3==1.25.7
+urllib3==1.25.8
 uuid==1.30
 webassets==0.12.1
 Werkzeug==0.16.0
