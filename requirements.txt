@@ -35,7 +35,7 @@ MarkupSafe==1.1.0
 mccabe==0.6.1
 peewee==3.8.2
 peewee-db-evolve==3.7.0
-protobuf==3.10.0
+protobuf==3.15.0
 psycopg2-binary==2.7.7
 pyasn1==0.4.8
 pyasn1-modules==0.2.7
