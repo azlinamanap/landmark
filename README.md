@@ -14,3 +14,5 @@ This app was developed for the final two-week project of the Next Academy Full S
 
 A working version can be accessed [here](https://landmarkit.netlify.com/), however the functionality is currently incomplete as the Google API Keys have been taken down to prevent excess API calls and unnecessary charges.
 
+Update: As of 2024, the site has been taken down due to inactivity.
+
